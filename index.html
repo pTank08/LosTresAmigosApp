@@ -42,7 +42,6 @@
     <button id="fullscreen-hotspot" type="button" aria-label="Toggle full screen"></button>
     <script>
       const canvas = document.querySelector("#unity-canvas");
-      const fullscreenHotspot = document.querySelector("#fullscreen-hotspot");
       const buildUrl = "Build";
       const config = {
         dataUrl: buildUrl + "/Brewboard_Rel_1.0.data.unityweb",
@@ -94,13 +93,26 @@
               }
             };
 
+            const isInFullscreenHotspot = (event) => {
+              const viewport = window.visualViewport;
+              const width = viewport ? viewport.width : window.innerWidth;
+              const height = viewport ? viewport.height : window.innerHeight;
+              return event.clientX >= width * 0.02 && event.clientX <= width * 0.14 &&
+                event.clientY >= height * 0.03 && event.clientY <= height * 0.15;
+            };
+
             let lastTap = null;
-            fullscreenHotspot.addEventListener("dblclick", (event) => {
+            // Unity promotes only the canvas into the browser's fullscreen layer.
+            // Listen at the document capture phase so the same hotspot remains
+            // available when the sibling button is no longer hit-testable.
+            document.addEventListener("dblclick", (event) => {
+              if (!isInFullscreenHotspot(event)) return;
+
               event.preventDefault();
               toggleFullscreen();
-            });
-            fullscreenHotspot.addEventListener("pointerup", (event) => {
-              if (event.pointerType === "mouse") return;
+            }, true);
+            document.addEventListener("pointerup", (event) => {
+              if (event.pointerType === "mouse" || !isInFullscreenHotspot(event)) return;
 
               event.preventDefault();
               const now = performance.now();
@@ -110,7 +122,7 @@
 
               lastTap = isDoubleTap ? null : point;
               if (isDoubleTap) toggleFullscreen();
-            });
+            }, true);
           })
           .catch((message) => {
             alert(message);
