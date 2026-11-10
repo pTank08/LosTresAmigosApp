@@ -88,11 +88,7 @@
               lastFullscreenToggleAt = now;
 
               if (document.fullscreenElement || document.webkitFullscreenElement) {
-                if (document.exitFullscreen) {
-                  document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                  document.webkitExitFullscreen();
-                }
+                unityInstance.SetFullscreen(0);
               } else {
                 unityInstance.SetFullscreen(1);
               }
